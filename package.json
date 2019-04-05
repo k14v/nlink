@@ -1,0 +1,36 @@
+{
+  "name": "@k14v/nlink",
+  "version": "0.0.1",
+  "description": "Expose a directory using require links usefull when transpiled src -> lib ",
+  "bin": "cli",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k14v/nlink.git"
+  },
+  "keywords": [
+    "nlink",
+    "link",
+    "npm",
+    "expose",
+    "lib",
+    "src",
+    "babel",
+    "transpiled",
+    "require",
+    "files"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/k14v/nlink/issues"
+  },
+  "homepage": "https://github.com/k14v/nlink#readme",
+  "dependencies": {
+    "glob": "^7.1.3",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.3"
+  }
+}
