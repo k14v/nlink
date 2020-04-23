@@ -6,7 +6,7 @@ const { getUniqueDirectories, getRootFiles, printLn, handleError } = require('./
 
 function clean({
   scanPattern,
-  ignorePatter,
+  ignorePattern,
   directoryToScan,
   outputDirectory,
 } = {}){
@@ -16,7 +16,7 @@ function clean({
     // Retrieve relative paths
     absolute: false,
     // Ignore files by pattern
-    ignore: ignorePatter,
+    ignore: ignorePattern,
   }, (err, files) => {
     if(err) return handleError(err);
 

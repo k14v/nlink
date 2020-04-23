@@ -16,7 +16,7 @@ const cleanFlag = process.argv.includes('--clean');
 
 const parameters = {
   scanPattern: SCAN_PATTERN,
-  IGNORE_PATTERN: IGNORE_PATTERN,
+  ignorePattern: IGNORE_PATTERN,
   directoryToScan,
   outputDirectory,
 };

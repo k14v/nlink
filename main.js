@@ -7,7 +7,7 @@ const { getUniqueDirectories, handleError, printLn } = require('./utils');
 
 function main({
   scanPattern,
-  ignorePatter,
+  ignorePattern,
   directoryToScan,
   outputDirectory,
 } = {}){
@@ -17,7 +17,7 @@ function main({
     // Retrieve relative paths
     absolute: false,
     // Ignore files by pattern
-    ignore: ignorePatter,
+    ignore: ignorePattern,
   }, (err, files) => {
     if(err) return handleError(err);
 
