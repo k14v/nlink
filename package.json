@@ -5,8 +5,7 @@
   "bin": "cli",
   "scripts": {
     "pretest": "scripts/create_fixtures",
-    "test": "ava --verbose",
-    "test:watch": "ava --watch"
+    "test": "tape cli.spec.js"
   },
   "repository": {
     "type": "git",
@@ -36,11 +35,6 @@
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
-    "ava": "^3.7.1"
-  },
-  "ava": {
-    "files": [
-      "*.spec.js"
-    ]
+    "tape": "^5.0.0"
   }
 }
