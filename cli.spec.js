@@ -1,79 +1,36 @@
 const test = require('ava');
-const fs = require('fs');
-const mkdirp = require('mkdirp');
-const rimraf = require('rimraf');
-const { exec } = require("child_process");
+const util = require('util');
+const path = require('path');
+const exec = util.promisify(require('child_process').exec);
+const glob = util.promisify(require('glob'));
 
+const cmd = './cli'
+const cwd = 'fixtures';
+let fixtures = [];
 
-test.before(t => {
-  /* Lets create this structure of folders and files
-    /test  
-      /first
-        /fourth
-          F.js
-          F.spec.js
-        A.js
-        B.js
-        C.js
-        C.spec.js
-      /second
-        D.js
-        E.js
-      /third
-        TEST.spec.js
-  */
-  const folders = [
-    './test/first/fourth',
-    './test/second',
-    './test/third',
-  ];
-  const files = [
-    './test/first/A.js',
-    './test/first/B.js',
-    './test/first/C.js',
-    './test/first/C.spec.js',
-    './test/first/fourth/F.js',
-    './test/first/fourth/F.spec.js',
-    './test/second/D.js',
-    './test/second/E.js',
-    './test/third/TEST.spec.js',
-  ];
-  return Promise.all(
-    folders.map((folder) => mkdirp(folder).catch((err) => t.log(err)))
-  ).then(() => {
-    files.forEach((file) => fs.writeFile(file, '', () => {}));
-  });
+test.before(async (t) => {
+  fixtures = await glob('**/*.js', { cwd });
 });
 
-test.after.always('Guaranteed cleanup', () => {
-  return new Promise((resolve, reject) => {
-    rimraf('{test,first,second}', (err) => err ? reject(error) : resolve());
-  });
+test.serial('should link the directories and the files which match the pattern', async (t) => {
+  const { stderr } = await exec([cmd, cwd].join(' '));
+  const lines = stderr.split('\n');
+  t.deepEqual(lines, [
+    '3 Directories linked!',
+    '8 Files linked!',
+    ''
+  ]);
 });
 
-test.serial('should link the directories and the files which match the pattern', (t) => {
-  return new Promise((resolve, reject) => {
-    exec('./cli test', (err, _, stderr) => {
-      if(err){
-        reject(t.fail());
-      } else {
-        t.true(stderr.includes('3 Directories'));
-        t.true(stderr.includes('6 Files'));
-        resolve();
-      }
-    })
-  })
+
+test.serial('should check if files are created', async (t) => {
+  const files = await glob('**/*.js', { cwd: process.cwd() });
+  const genFiles = files.filter((value, index, self) => fixtures.indexOf(value) !== -1);
+
+  t.is(genFiles.length, 8);
 });
 
-test.serial('should clean all the linked folders and files when the flag --clean it\'s used', (t) => {
-  return new Promise((resolve, reject) => {
-    exec('./cli test --clean', (err, _, stderr) => {
-      if(err){
-        reject(t.fail());
-      } else {
-        t.true(stderr.includes('3 Files cleaned'));
-        resolve();
-      }
-    })
-  })
+test.serial('should clean all the linked folders and files when the flag --clean it\'s used', async (t) => {
+  const { stderr } = await exec([cmd, cwd, '--clean'].join(' '));
+  t.is(stderr, '5 Files cleaned!\n');
 });
