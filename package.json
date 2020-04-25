@@ -4,9 +4,9 @@
   "description": "Expose a directory using require links usefull when transpiled src -> lib ",
   "bin": "cli",
   "scripts": {
-    "pretest": "scripts/create_fixtures",
+    "pretest": "scripts/fixtures_gen",
     "test": "ava --verbose",
-    "test:watch": "ava --watch"
+    "posttest": "scripts/fixtures_gen --clean"
   },
   "repository": {
     "type": "git",
