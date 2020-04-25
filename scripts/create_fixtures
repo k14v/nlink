@@ -1,0 +1,84 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const fs = require('fs');
+const mkdirp = require('mkdirp')
+
+/* Lets create this structure of folders and files
+    /test  
+      /first
+        /fourth
+          F.js
+          F.spec.js
+        A.js
+        B.js
+        C.js
+        C.spec.js
+      /second
+        D.js
+        E.js
+      /third
+        TEST.spec.js
+  */
+
+const cwd = process.cwd();
+const dir = path.resolve(cwd, 'fixtures');
+const files = [
+  'A.js',
+  'B.js',
+  'B.spec.js',
+  'first/A.js',
+  'first/B.js',
+  'first/C.js',
+  'first/C.spec.js',
+  'first/fourth/F.js',
+  'first/fourth/F.spec.js',
+  'second/D.js',
+  'second/E.js',
+  'third/TEST.spec.js',
+]
+.map((filename) => path.resolve(dir, filename));
+
+// Create unique nested directories
+const createDirectories = (files) => Promise.all(files
+  // resolve directories
+  .map((filename) => path.dirname(filename))
+  // filter unique directories
+  .filter((filename, index, self) => {
+    const idx = self.indexOf(filename);
+    // remove duplicates and also self contained 
+    // directories which starts with the same pattern
+    return idx !== 0 && idx === index
+  })
+  .map((value) => mkdirp(value)))
+
+// Create non existing fixtures
+const createFixtures = (files, force) => Promise.all(files
+    .map((filename) => new Promise((resolve, reject) => {
+      fs.exists(filename, (exists) => {
+        if (!exists || force) {
+          fs.writeFile(filename, Buffer.from(path.basename(filename)), { encoding: 'utf8' }, (err) => {
+            if (err) {
+              return reject(err);
+            }
+            resolve(filename)
+          });
+        } else {
+          resolve(false);
+        }
+      })
+    }))
+  ).then((files) => files.filter((created) => created));
+
+createDirectories(files)
+  .then(() => createFixtures(files, process.argv.includes('--force')))
+  .then((fixtures) => {
+    if (fixtures.length) {
+      console.log('Fixtures created\n', JSON.stringify(fixtures, null, 4));
+    } else {
+      console.log('Fixtures already created, ignoring...');
+    }
+  })
+  .catch((e) => {
+    console.error('Fixtures failed', e);
+  });
