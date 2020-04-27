@@ -8,6 +8,11 @@
     "test": "ava --verbose",
     "posttest": "scripts/fixtures_gen --clean"
   },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm test"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/k14v/nlink.git"
@@ -36,7 +41,8 @@
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
-    "ava": "^3.7.1"
+    "ava": "^3.7.1",
+    "husky": "^4.2.5"
   },
   "ava": {
     "files": [
