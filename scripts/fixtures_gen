@@ -1,0 +1,102 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const fs = require('fs');
+const util = require('util');
+const rimraf = util.promisify(require('rimraf'));
+const mkdirp = util.promisify(require('mkdirp'));
+
+/* Lets create this structure of folders and files
+    /fixtures  
+      A.js
+      B.js
+      B.spec.js
+      /first
+        /fourth
+          F.js
+          F.spec.js
+        A.js
+        B.js
+        C.js
+        C.spec.js
+      /second
+        D.js
+        E.js
+      /third
+        TEST.spec.js
+  */
+
+const cwd = process.cwd();
+const dir = path.resolve(cwd, 'fixtures');
+const files = [
+  'A.js',
+  'B.js',
+  'B.spec.js',
+  'first/A.js',
+  'first/B.js',
+  'first/C.js',
+  'first/C.spec.js',
+  'first/fourth/F.js',
+  'first/fourth/F.spec.js',
+  'second/D.js',
+  'second/E.js',
+  'third/TEST.spec.js',
+]
+.map((filename) => path.resolve(dir, filename));
+
+// Create unique nested directories
+const createDirectories = (files) => Promise.all(files
+  // resolve directories
+  .map((filename) => path.dirname(filename))
+  // filter unique directories 
+  .reduce((prev, value) => {      
+    // Check if the starts of filename is coincident 
+    const idx = prev.findIndex((cur) => value.substring(0, cur.length) === cur);
+    if (idx === -1) {
+      prev.push(value)
+    } else {
+      // replace previous coincident
+      prev.splice(idx, 1, value)
+    }
+    
+    return prev ;
+  }, [])
+  .map((value) => mkdirp(value)))
+
+// Create non existing fixtures
+const createFixtures = (files, force) => Promise.all(files
+    .map((filename) => new Promise((resolve, reject) => {
+      fs.exists(filename, (exists) => {
+        if (!exists || force) {
+          fs.writeFile(filename, Buffer.from(path.basename(filename)), { encoding: 'utf8' }, (err) => {
+            if (err) {
+              return reject(err);
+            }
+            resolve(filename)
+          });
+        } else {
+          resolve(false);
+        }
+      })
+    }))
+  ).then((files) => files.filter((created) => created));
+
+
+if (process.argv.includes('--clean')) {
+  rimraf(dir).then(() => {
+    console.log('Fixtures removed');
+  });
+} else {
+  createDirectories(files)
+  .then(() => createFixtures(files, process.argv.includes('--force')))
+  .then((fixtures) => {
+    if (fixtures.length) {
+      console.log('Fixtures created\n', JSON.stringify(fixtures, null, 4));
+    } else {
+      console.log('Fixtures already created, ignoring...');
+    }
+  })
+  .catch((e) => {
+    console.error('Fixtures failed', e);
+  });
+}
