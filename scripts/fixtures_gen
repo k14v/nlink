@@ -7,7 +7,7 @@ const rimraf = util.promisify(require('rimraf'));
 const mkdirp = require('mkdirp');
 
 /* Lets create this structure of folders and files
-    /fixtures  
+    /fixtures
       A.js
       B.js
       B.spec.js
@@ -65,18 +65,17 @@ const createDirectories = (files) => Promise.all(files
 // Create non existing fixtures
 const createFixtures = (files, force) => Promise.all(files
     .map((filename) => new Promise((resolve, reject) => {
-      fs.exists(filename, (exists) => {
-        if (!exists || force) {
+      fs.access(filename, fs.constants.F_OK, (err) => {
+        if(err || force){
           fs.writeFile(filename, Buffer.from(path.basename(filename)), { encoding: 'utf8' }, (err) => {
             if (err) {
               return reject(err);
             }
             resolve(filename)
           });
-        } else {
-          resolve(false);
         }
-      })
+        resolve(false);
+      });
     }))
   ).then((files) => files.filter((created) => created));
 
