@@ -48,9 +48,9 @@ const files = [
 const createDirectories = (files) => Promise.all(files
   // resolve directories
   .map((filename) => path.dirname(filename))
-  // filter unique directories 
-  .reduce((prev, value) => {      
-    // Check if the starts of filename is coincident 
+  // filter unique directories
+  .reduce((prev, value) => {
+    // Check if the starts of filename is coincident
     const idx = prev.findIndex((cur) => value.substring(0, cur.length) === cur);
     if (idx === -1) {
       prev.push(value)
@@ -58,8 +58,7 @@ const createDirectories = (files) => Promise.all(files
       // replace previous coincident
       prev.splice(idx, 1, value)
     }
-    
-    return prev ;
+    return prev;
   }, [])
   .map((value) => mkdirp(value)))
 
