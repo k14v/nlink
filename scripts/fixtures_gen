@@ -4,10 +4,10 @@ const path = require('path');
 const fs = require('fs');
 const util = require('util');
 const rimraf = util.promisify(require('rimraf'));
-const mkdirp = util.promisify(require('mkdirp'));
+const mkdirp = require('mkdirp');
 
 /* Lets create this structure of folders and files
-    /fixtures  
+    /fixtures
       A.js
       B.js
       B.spec.js
@@ -48,9 +48,9 @@ const files = [
 const createDirectories = (files) => Promise.all(files
   // resolve directories
   .map((filename) => path.dirname(filename))
-  // filter unique directories 
-  .reduce((prev, value) => {      
-    // Check if the starts of filename is coincident 
+  // filter unique directories
+  .reduce((prev, value) => {
+    // Check if the starts of filename is coincident
     const idx = prev.findIndex((cur) => value.substring(0, cur.length) === cur);
     if (idx === -1) {
       prev.push(value)
@@ -58,26 +58,24 @@ const createDirectories = (files) => Promise.all(files
       // replace previous coincident
       prev.splice(idx, 1, value)
     }
-    
-    return prev ;
+    return prev;
   }, [])
   .map((value) => mkdirp(value)))
 
 // Create non existing fixtures
 const createFixtures = (files, force) => Promise.all(files
     .map((filename) => new Promise((resolve, reject) => {
-      fs.exists(filename, (exists) => {
-        if (!exists || force) {
+      fs.access(filename, fs.constants.F_OK, (err) => {
+        if(err || force){
           fs.writeFile(filename, Buffer.from(path.basename(filename)), { encoding: 'utf8' }, (err) => {
             if (err) {
               return reject(err);
             }
             resolve(filename)
           });
-        } else {
-          resolve(false);
         }
-      })
+        resolve(false);
+      });
     }))
   ).then((files) => files.filter((created) => created));
 

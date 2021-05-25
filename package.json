@@ -37,12 +37,15 @@
   "homepage": "https://github.com/k14v/nlink#readme",
   "dependencies": {
     "glob": "^7.1.6",
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^1.0.4",
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
     "ava": "^3.7.1",
     "husky": "^4.2.5"
+  },
+  "engines": {
+    "node": ">=10"
   },
   "ava": {
     "files": [

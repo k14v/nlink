@@ -8,7 +8,7 @@ const cmd = './cli'
 const cwd = 'fixtures';
 let fixtures = [];
 
-test.before(async (t) => {
+test.before(async () => {
   fixtures = await glob('**/*.js', { cwd });
 });
 
@@ -21,7 +21,6 @@ test.serial('should link the directories and the files which match the pattern',
     ''
   ]);
 });
-
 
 test.serial('should check if files are created', async (t) => {
   const files = await glob('**/*.js', { cwd: process.cwd() });

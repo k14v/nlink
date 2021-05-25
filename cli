@@ -1,82 +1,28 @@
 #!/usr/bin/env node
 
 const path = require('path');
-const fs = require('fs');
-const glob = require('glob');
-const mkdirp = require('mkdirp');
-const rimraf = require('rimraf');
+const main = require('./main');
+const clean = require('./clean');
 
-const argDir = process.argv[2];
-const cwdDir = process.cwd();
-const scanDir = path.join(cwdDir, argDir);
+
+const SCAN_PATTERN = '{*.js,**/*.js}';
+const IGNORE_PATTERN = '{*.*.js,**/*.*.js}';
+
+const argDir = process.argv[2] || '.';
+const outputDirectory = process.cwd();
+const directoryToScan = path.join(outputDirectory, argDir);
+
 const cleanFlag = process.argv.includes('--clean');
 
-const waterfall = (fn, arr, end, ...args) => {
-  if (arr.length === 0) {
-    if (end) end();
-    return;
-  }
-  const p = arr[0];
-  fn(p, ...args.concat([(err) => {
-    if (err) {
-      console.error(err.message);
-      process.exit(1);
-    } else waterfall(fn, arr.slice(1), end, ...args);
-  }]));
+const parameters = {
+  scanPattern: SCAN_PATTERN,
+  ignorePattern: IGNORE_PATTERN,
+  directoryToScan,
+  outputDirectory,
 };
 
+if(cleanFlag){
+  return clean(parameters);
+}
 
-const wmkdirp = (paths, cb) => waterfall(mkdirp, paths, cb);
-
-const wmkfile = (files, {cwdDir, argDir}, cb) => waterfall((file, next) => {
-  // Workaround to ensure relative works always as expected
-  const relPath = path.relative(path.dirname(path.join(cwdDir, file)), path.join(argDir, file)).replace(/\\/gi, '/');
-  fs.writeFile(path.join(cwdDir, file), `module.exports = require('./${relPath}');\n`, (err) => {
-    next(err);
-  });
-}, files, cb);
-
-glob('{*.js,**/*.js}', {
-  // Restrict scan directory
-  cwd: scanDir,
-  // Retrieve relative paths
-  absolute: false,
-  // Ignore files that it being used in local only by its sibling
-  ignore: '{*.*.js,**/*.*.js}',
-}, (err, files) => {
-  // Get all root files
-  const rfiles = files
-    .filter(file => path.dirname(file) === '.');
-
-  // Get all unique directories and ignore root files
-  const rdirs = files
-    .map(path.dirname.bind(null))
-    .filter((file, index, self) => self.indexOf(file) === index && file !== '.');
-
-  // Remove files when clean flag is detected
-  if (cleanFlag) {
-    const rimrafFiles = rdirs.concat(rfiles);
-    const rimrafPattern = path.join(cwdDir, `{${rimrafFiles.join(',')}}`);
-    return rimraf(rimrafPattern, (err) => {
-      if (err) {
-        console.error(err);
-        return process.exit(1);
-      }
-      process.stderr.write(`${rimrafFiles.length} Files cleaned!\n`);
-      return 0;
-    });
-  }
-
-  // Create directory links
-  wmkdirp(rdirs, () => {
-    process.stderr.write(`${rdirs.length} Directories linked!\n`);
-  });
-
-  // Create file links
-  wmkfile(files, {
-    argDir,
-    cwdDir,
-  }, () => {
-    process.stderr.write(`${files.length} Files linked!\n`);
-  });
-});
+main(parameters);
