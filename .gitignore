@@ -105,3 +105,4 @@ build/**/*
 /lib
 .tgz
 /public/dist
+*.tsbuildinfo
