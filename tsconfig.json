@@ -1,0 +1,9 @@
+{
+  "extends": "@tsconfig/node10/tsconfig.json",
+  "exclude": ["node_modules", "**/*.spec.ts"],
+  "include": ["typings", "src"],
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src"
+  }
+}
