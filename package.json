@@ -1,12 +1,13 @@
 {
   "name": "@k14v/nlink",
-  "version": "0.0.1",
-  "description": "Expose a directory using require links usefull when transpiled src -> lib ",
-  "bin": "cli",
+  "version": "2.0.0-beta",
+  "description": "Modifies the global NodeJS module links to transpiled directory src -> lib",
+  "bin": "bin/cli",
   "scripts": {
-    "pretest": "scripts/fixtures_gen",
-    "test": "ava --verbose",
-    "posttest": "scripts/fixtures_gen --clean"
+    "test": "nyc --reporter=lcov ava --verbose",
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "prepack": "npm run build"
   },
   "husky": {
     "hooks": {
@@ -25,31 +26,64 @@
     "lib",
     "src",
     "babel",
+    "typescript",
     "transpiled",
     "require",
     "files"
   ],
-  "author": "",
+  "contributors": [
+    {
+      "name": "kelvur",
+      "email": "osorio10.92@gmail.com",
+      "url": "https://github.com/kelvur"
+    },
+    {
+      "name": "rubeniskov",
+      "email": "me@rubeniskov.com",
+      "url": "https://github.com/rubeniskov"
+    }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/k14v/nlink/issues"
   },
   "homepage": "https://github.com/k14v/nlink#readme",
   "dependencies": {
+    "debug": "^4.3.4",
+    "find-up": "^4.1.0",
     "glob": "^7.1.6",
     "mkdirp": "^1.0.4",
-    "rimraf": "^3.0.2"
+    "npm-root": "^1.1.0",
+    "read-tsconfig": "^1.0.1",
+    "rimraf": "^3.0.2",
+    "yargs": "^17.4.0"
   },
   "devDependencies": {
-    "ava": "^3.7.1",
-    "husky": "^4.2.5"
+    "@schemastore/package": "^0.0.6",
+    "@tsconfig/node10": "^1.0.8",
+    "@types/debug": "^4.1.7",
+    "@types/node": "^17.0.23",
+    "@types/yargs": "^17.0.10",
+    "ava": "^4.1.0",
+    "execa": "^5.1.1",
+    "file-fixture": "^0.0.2",
+    "husky": "^4.2.5",
+    "nyc": "^15.1.0",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.3"
   },
   "engines": {
     "node": ">=10"
   },
   "ava": {
     "files": [
-      "*.spec.js"
+      "src/*.spec.ts"
+    ],
+    "extensions": [
+      "ts"
+    ],
+    "nodeArguments": [
+      "--loader=ts-node/esm"
     ]
   }
 }
